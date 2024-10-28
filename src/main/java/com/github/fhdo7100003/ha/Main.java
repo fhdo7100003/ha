@@ -15,7 +15,6 @@ import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
 
 import io.javalin.Javalin;
-import io.javalin.http.staticfiles.Location;
 
 public class Main {
   record Response(UUID id, Report report) {
@@ -27,11 +26,6 @@ public class Main {
     // NOTE: intermediate variable otherwise horrible formatting
     final var javalin = Javalin.create(cfg -> {
       cfg.useVirtualThreads = true;
-      cfg.staticFiles.add(st -> {
-        st.hostedPath = "/logs";
-        st.directory = logPath;
-        st.location = Location.EXTERNAL;
-      });
     });
 
     javalin
