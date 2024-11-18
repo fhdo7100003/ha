@@ -1,5 +1,6 @@
 package com.github.fhdo7100003.ha.device;
 
+import java.lang.reflect.Type;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.util.Calendar;

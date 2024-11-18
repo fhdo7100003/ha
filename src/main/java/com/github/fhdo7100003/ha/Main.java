@@ -3,10 +3,13 @@ package com.github.fhdo7100003.ha;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.file.Path;
+import java.util.Calendar;
 
 import org.jetbrains.annotations.NotNull;
 
 import com.github.fhdo7100003.ha.Simulation.InvalidSimulation;
+import com.github.fhdo7100003.ha.device.Device;
+import com.github.fhdo7100003.ha.device.DeviceSerializer;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
@@ -16,17 +19,21 @@ import io.javalin.json.JsonMapper;
 import io.javalin.util.JavalinLogger;
 
 public class Main {
+  public static Gson Gson = new GsonBuilder()
+      .registerTypeAdapter(Device.class, new DeviceSerializer())
+      .registerTypeAdapter(Calendar.class, new CalendarDeserializer())
+      .create();
+
   public static void main(String[] args) {
-    Gson gson = new GsonBuilder().create();
     JsonMapper gsonMapper = new JsonMapper() {
       @Override
       public String toJsonString(@NotNull Object obj, @NotNull Type type) {
-        return gson.toJson(obj, type);
+        return Gson.toJson(obj, type);
       }
 
       @Override
       public <T> T fromJsonString(@NotNull String json, @NotNull Type targetType) {
-        return gson.fromJson(json, targetType);
+        return Gson.fromJson(json, targetType);
       }
     };
 

@@ -16,10 +16,11 @@ import org.jetbrains.annotations.NotNull;
 import com.github.fhdo7100003.ha.Logger.LineFormatter;
 import com.github.fhdo7100003.ha.Util.FusedInputStream;
 import com.github.fhdo7100003.ha.Util.Result;
+
+import static com.github.fhdo7100003.ha.Main.Gson;
 import static com.github.fhdo7100003.ha.Util.hasExtension;
 import com.github.fhdo7100003.ha.Simulation.Report;
 import com.github.fhdo7100003.ha.Simulation.StaticTimestampGenerator;
-import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
 
 import io.javalin.http.Context;
@@ -43,7 +44,7 @@ public final class ApiController {
 
   private static record FinishedSimulation(Path root) {
     public @NotNull Report readResult() throws IOException, JsonParseException {
-      return new Gson().fromJson(Files.newBufferedReader(root.resolve(RESULT_FILENAME)), Report.class);
+      return Gson.fromJson(Files.newBufferedReader(root.resolve(RESULT_FILENAME)), Report.class);
     }
 
     public @NotNull Set<String> readDevices() throws IOException {
@@ -101,7 +102,7 @@ public final class ApiController {
         try (final var logger = Logger.open(resultDir, new LineFormatter(), gen)) {
           final var res = sim.run(logger);
           final var resp = new SimulationResult(id, res);
-          Files.writeString(resultDir.resolve(RESULT_FILENAME), new Gson().toJson(resp.report()));
+          Files.writeString(resultDir.resolve(RESULT_FILENAME), Gson.toJson(resp.report()));
           Files.writeString(resultDir.resolve(SOURCE_FILENAME), source);
           ret.complete(Result.ok(resp));
         } catch (IOException e) {

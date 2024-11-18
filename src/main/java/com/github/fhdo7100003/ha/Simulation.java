@@ -3,23 +3,18 @@ package com.github.fhdo7100003.ha;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Consumer;
 
 import com.github.fhdo7100003.ha.Logger.TimestampGenerator;
 import com.github.fhdo7100003.ha.device.*;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import com.google.gson.JsonParser;
+
+import static com.github.fhdo7100003.ha.Main.Gson;
 
 public class Simulation {
   final Calendar startTime;
@@ -70,37 +65,24 @@ public class Simulation {
   }
 
   public static Simulation fromJSON(final String json) {
-    final var parsed = JsonParser.parseString(json).getAsJsonObject();
-    final var startTime = parseRfc3339(parsed.get("startTime").getAsString());
-    final var endTime = parseRfc3339(parsed.get("endTime").getAsString());
-
+    record SimulationJson(
+        Calendar startTime,
+        Calendar endTime,
+        List<Device> devices) {
+    }
+    final var parsed = Gson.fromJson(json, SimulationJson.class);
     final List<Device> devices = new ArrayList<>();
     final List<Store> stores = new ArrayList<>();
-    final var deviceArr = Objects.requireNonNullElseGet(forceField(parsed, "devices").getAsJsonArray(),
-        () -> new JsonArray());
-    for (final var device : deviceArr) {
-      final var deviceObj = device.getAsJsonObject();
 
-      final var name = forcePrimitiveField(deviceObj, "name", String.class).getAsString();
-      final var type = forcePrimitiveField(deviceObj, "type", String.class).getAsString();
-      switch (type) {
-        case "StableDevice":
-          devices.add(new StableDevice(name, forcePrimitiveField(deviceObj, "produces", Integer.class).getAsInt()));
-          break;
-        case "Store":
-          final var capacity = forcePrimitiveField(deviceObj, "maxCapacity", Integer.class).getAsInt();
-          final var chargePerTick = forcePrimitiveField(deviceObj, "maxChargePerTick", Integer.class).getAsInt();
-          stores.add(new Store(name, capacity, chargePerTick));
-          break;
-        case "SolarPanel":
-          devices.add(new SolarPanel(name));
-          break;
-        default:
-          throw new JsonParseException(String.format("Unknown type %s", type));
+    for (final var device : parsed.devices) {
+      if (device instanceof Store store) {
+        stores.add(store);
+      } else {
+        devices.add(device);
       }
     }
 
-    return new Simulation(startTime, endTime, stores, devices);
+    return new Simulation(parsed.startTime, parsed.endTime, stores, devices);
   }
 
   public static Simulation fromPath(final Path path) throws IOException {
@@ -160,13 +142,6 @@ public class Simulation {
 
   // TODO: add more interesting fields
   public static record Report(long result) {
-  }
-
-  private static Calendar parseRfc3339(final String s) {
-    // this time API is a mess
-    final var parsed = Instant.parse(s);
-    final var dt = ZonedDateTime.ofInstant(parsed, ZoneId.systemDefault());
-    return GregorianCalendar.from(dt);
   }
 
   public static class InvalidSimulation extends RuntimeException {
