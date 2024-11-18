@@ -6,8 +6,6 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -16,6 +14,7 @@ import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.fhdo7100003.ha.Logger.LineFormatter;
+import com.github.fhdo7100003.ha.Util.FusedInputStream;
 import com.github.fhdo7100003.ha.Util.Result;
 import static com.github.fhdo7100003.ha.Util.hasExtension;
 import com.github.fhdo7100003.ha.Simulation.Report;
@@ -58,11 +57,12 @@ public final class ApiController {
       return new BufferedInputStream(Files.newInputStream(root.resolve("all.txt")));
     }
 
-    public @NotNull String readDeviceLog(@NotNull final String deviceName) throws IOException {
+    public @NotNull InputStream readDeviceLog(@NotNull final String deviceName) throws IOException {
       // NOTE: probably better to make some sort of fusedinputstream that concats the
       // inputstreams instead
-      final var sb = new StringBuilder();
-      try (var list = Files.list(root)) {
+      try (final var ret = FusedInputStream.builder();
+          final var list = Files.list(root)) {
+
         final var deviceLogs = list
             .filter(entry -> {
               if (entry.getFileName().equals(Path.of("all.txt")) || !hasExtension(entry, ".txt")) {
@@ -75,11 +75,11 @@ public final class ApiController {
         deviceLogs.sort((a, b) -> a.compareTo(b));
 
         for (final var entry : deviceLogs) {
-          sb.append(Files.readString(entry));
+          ret.add(Files.newInputStream(entry));
         }
-      }
 
-      return sb.toString();
+        return new BufferedInputStream(ret.build());
+      }
     }
 
     public @NotNull InputStream getSource() throws IOException {
@@ -145,13 +145,14 @@ public final class ApiController {
     final var uuid = ctx.pathParam("uuid");
     final var sim = new FinishedSimulation(logPath.resolve(uuid));
 
-    record Response(List<String> devices, Report res) {
+    record Response(Set<String> devices, Report res) {
     }
 
     try {
-      ctx.json(new Response(new ArrayList<>(sim.readDevices()), sim.readResult()));
+      ctx.json(new Response(sim.readDevices(), sim.readResult()));
     } catch (JsonParseException e) {
       JavalinLogger.error("Invalid saved json for simulation", e);
+      ctx.status(500);
     }
   }
 

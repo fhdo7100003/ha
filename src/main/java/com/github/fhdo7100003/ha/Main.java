@@ -2,12 +2,10 @@ package com.github.fhdo7100003.ha;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.fhdo7100003.ha.LogMeta.LogFilter;
 import com.github.fhdo7100003.ha.Simulation.InvalidSimulation;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
