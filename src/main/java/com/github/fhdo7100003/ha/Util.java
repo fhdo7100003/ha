@@ -47,7 +47,7 @@ public class Util {
   }
 
   public static final class FusedInputStreamBuilder implements Closeable {
-    final List<InputStream> sources;
+    List<InputStream> sources;
 
     FusedInputStreamBuilder() {
       sources = new ArrayList<>();
@@ -62,7 +62,9 @@ public class Util {
       // NOTE: important to clear the sources, otherwise
       // annoying to use with try-with-ressources
       final var ret = new FusedInputStream(sources);
-      sources.clear();
+      // NOTE: don't clear the original one because pass
+      // by reference, just get a new list
+      sources = new ArrayList<>();
       return ret;
     }
 
