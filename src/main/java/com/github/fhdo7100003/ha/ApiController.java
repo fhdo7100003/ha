@@ -29,6 +29,10 @@ public final class ApiController {
   final Path logPath;
   final SimulationRunner runner;
 
+  private static final String ALL_LOG_FILENAME = "all.txt";
+  private static final String RESULT_FILENAME = "result.json";
+  private static final String SOURCE_FILENAME = "source.json";
+
   public ApiController(@NotNull final Path logPath) {
     this.logPath = logPath;
     this.runner = new SimulationRunner(logPath);
@@ -39,14 +43,14 @@ public final class ApiController {
 
   private static record FinishedSimulation(Path root) {
     public @NotNull Report readResult() throws IOException, JsonParseException {
-      return new Gson().fromJson(Files.newBufferedReader(root), Report.class);
+      return new Gson().fromJson(Files.newBufferedReader(root.resolve(RESULT_FILENAME)), Report.class);
     }
 
     public @NotNull Set<String> readDevices() throws IOException {
       try (var list = Files.list(root)) {
         return list
             .filter(entry -> {
-              return !entry.getFileName().toString().equals("all.txt") && hasExtension(entry, ".txt");
+              return !entry.getFileName().toString().equals(ALL_LOG_FILENAME) && hasExtension(entry, ".txt");
             })
             .map(entry -> LogMeta.parse(entry.getFileName().toString()).deviceName())
             .collect(Collectors.toSet());
@@ -54,7 +58,7 @@ public final class ApiController {
     }
 
     public @NotNull InputStream getLog() throws IOException {
-      return new BufferedInputStream(Files.newInputStream(root.resolve("all.txt")));
+      return new BufferedInputStream(Files.newInputStream(root.resolve(ALL_LOG_FILENAME)));
     }
 
     public @NotNull InputStream readDeviceLog(@NotNull final String deviceName) throws IOException {
@@ -65,7 +69,7 @@ public final class ApiController {
 
         final var deviceLogs = list
             .filter(entry -> {
-              if (entry.getFileName().equals(Path.of("all.txt")) || !hasExtension(entry, ".txt")) {
+              if (entry.getFileName().equals(Path.of(ALL_LOG_FILENAME)) || !hasExtension(entry, ".txt")) {
                 return false;
               }
               final var meta = LogMeta.parse(entry.getFileName().toString());
@@ -83,7 +87,7 @@ public final class ApiController {
     }
 
     public @NotNull InputStream getSource() throws IOException {
-      return new BufferedInputStream(Files.newInputStream(root.resolve("source.json")));
+      return new BufferedInputStream(Files.newInputStream(root.resolve(SOURCE_FILENAME)));
     }
   }
 
@@ -97,8 +101,8 @@ public final class ApiController {
         try (final var logger = Logger.open(resultDir, new LineFormatter(), gen)) {
           final var res = sim.run(logger);
           final var resp = new SimulationResult(id, res);
-          Files.writeString(resultDir.resolve("result.json"), new Gson().toJson(resp.report()));
-          Files.writeString(resultDir.resolve("source.json"), source);
+          Files.writeString(resultDir.resolve(RESULT_FILENAME), new Gson().toJson(resp.report()));
+          Files.writeString(resultDir.resolve(SOURCE_FILENAME), source);
           ret.complete(Result.ok(resp));
         } catch (IOException e) {
           ret.complete(Result.err(e));
