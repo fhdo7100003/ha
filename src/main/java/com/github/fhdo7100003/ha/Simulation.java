@@ -10,9 +10,6 @@ import java.util.function.Consumer;
 
 import com.github.fhdo7100003.ha.Logger.TimestampGenerator;
 import com.github.fhdo7100003.ha.device.*;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
 
 import static com.github.fhdo7100003.ha.Main.Gson;
 
@@ -31,37 +28,6 @@ public class Simulation {
     this.endTime = endTime;
     this.stores = stores;
     this.devices = devices;
-  }
-
-  private static JsonElement forceField(final JsonObject obj, final String field) {
-    final var ret = obj.get(field);
-    if (ret == null) {
-      throw new JsonParseException(String.format("Missing field %s in %s", field, obj));
-    }
-
-    return ret;
-  }
-
-  private static <T> JsonElement forcePrimitiveField(final JsonObject obj, final String field, final Class<T> c) {
-    final var ret = forceField(obj, field);
-    final var prim = ret.getAsJsonPrimitive();
-
-    String err = null;
-    if (c == String.class) {
-      if (!prim.isString()) {
-        err = "Expected string";
-      }
-    } else if (c == Integer.class) {
-      if (!prim.isNumber()) {
-        err = "Expected integer";
-      }
-    }
-
-    if (err != null) {
-      throw new JsonParseException(String.format("%s for field %s: Got %s", err, field, prim));
-    }
-
-    return ret;
   }
 
   public static Simulation fromJSON(final String json) {

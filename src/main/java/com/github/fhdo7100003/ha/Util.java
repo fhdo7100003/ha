@@ -136,34 +136,4 @@ public class Util {
     }
   }
 
-  public static JsonElement forceField(final JsonObject obj, final String field) throws JsonParseException {
-    final var ret = obj.get(field);
-    if (ret == null) {
-      throw new JsonParseException(String.format("Missing field %s in %s", field, obj));
-    }
-
-    return ret;
-  }
-
-  public static <T> JsonElement forcePrimitiveField(final JsonObject obj, final String field, final Class<T> c) {
-    final var ret = forceField(obj, field);
-    final var prim = ret.getAsJsonPrimitive();
-
-    String err = null;
-    if (c == String.class) {
-      if (!prim.isString()) {
-        err = "Expected string";
-      }
-    } else if (c == Integer.class) {
-      if (!prim.isNumber()) {
-        err = "Expected integer";
-      }
-    }
-
-    if (err != null) {
-      throw new JsonParseException(String.format("%s for field %s: Got %s", err, field, prim));
-    }
-
-    return ret;
-  }
 }

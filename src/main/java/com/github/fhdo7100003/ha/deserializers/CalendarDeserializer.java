@@ -1,4 +1,4 @@
-package com.github.fhdo7100003.ha;
+package com.github.fhdo7100003.ha.deserializers;
 
 import java.lang.reflect.Type;
 import java.time.Instant;

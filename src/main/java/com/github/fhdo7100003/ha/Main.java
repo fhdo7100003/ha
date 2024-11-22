@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 
 import com.github.fhdo7100003.ha.Simulation.InvalidSimulation;
 import com.github.fhdo7100003.ha.device.Device;
-import com.github.fhdo7100003.ha.device.DeviceSerializer;
+import com.github.fhdo7100003.ha.deserializers.*;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
