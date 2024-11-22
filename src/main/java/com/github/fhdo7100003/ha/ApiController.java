@@ -115,7 +115,7 @@ public final class ApiController {
 
   public void getAllSimulations(@NotNull final Context ctx) throws IOException {
     try (var list = Files.list(logPath)) {
-      record Field(long timestamp, UUID simulations) {
+      record Field(long timestamp, UUID id) {
       }
 
       final var simulations = list.map(entry -> {
