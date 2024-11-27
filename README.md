@@ -6,6 +6,12 @@ Use `./mvnw` on UNIX and `./mvnw.cmd` on Windows
 
 Importing into eclipse: File -> Import -> Maven -> Checkout or import from local repo
 
+## Installing maven deps (needed before it can be run)
+
+```sh
+./mvnw install
+```
+
 ## Running tests
 
 ```sh
@@ -23,10 +29,3 @@ Importing into eclipse: File -> Import -> Maven -> Checkout or import from local
 ```sh
 ./mvnw package
 ```
-
-## Assignments
-
-- 7100003 [fhdo7100003](https://github.com/fhdo7100003) Parallelization, API
-- 7220676 [sey1235](https://github.com/sey1235) TODO
-- 7219646 [kanika-sehgal123](https://github.com/kanika-sehgal123) TODO
-- 7213668 [arnob32](https://github.com/arnob32) TODO
