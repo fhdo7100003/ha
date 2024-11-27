@@ -2,6 +2,7 @@ package com.github.fhdo7100003.ha;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Calendar;
 
@@ -43,7 +44,14 @@ public class Main {
       cfg.jsonMapper(gsonMapper);
     });
 
-    final var apiController = new ApiController(Path.of("log"));
+    final var logPath = Path.of("log");
+    try {
+      Files.createDirectories(logPath);
+    } catch (IOException e) {
+      throw new RuntimeException("Failed creating log directory", e);
+    }
+
+    final var apiController = new ApiController(logPath);
 
     javalin
         .put("/simulation", apiController::runSimulation)
