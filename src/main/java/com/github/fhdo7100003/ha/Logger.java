@@ -4,6 +4,8 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -124,7 +126,15 @@ public final class Logger implements Closeable {
       sink = entry.sink;
     }
 
-    final var buf = fmt.format(now, message, attrs);
+    // FIXME: probably better way to do this
+    final var args = new ArrayList<Object>();
+    args.add("device");
+    args.add(deviceName);
+    for (final var field : attrs) {
+      args.add(field);
+    }
+
+    final var buf = fmt.format(now, message, args.toArray());
     sink.tell(new WriteEntry(buf));
 
     mainLog.tell(new WriteEntry(buf));
