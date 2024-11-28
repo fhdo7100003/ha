@@ -89,6 +89,8 @@ public class Simulation {
       final var it = stores.iterator();
       while (consumed != 0 && it.hasNext()) {
         final var store = it.next();
+        final var used = store.tryCharge(consumed);
+        logger.logDevice(store, "used store", consumed > 0 ? "charged" : "discharged", Math.abs(used));
         consumed = consumed - store.tryCharge(consumed);
       }
 

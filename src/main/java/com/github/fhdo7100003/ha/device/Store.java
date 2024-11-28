@@ -2,6 +2,8 @@ package com.github.fhdo7100003.ha.device;
 
 import java.util.Calendar;
 
+import com.github.fhdo7100003.ha.Logger;
+
 public final class Store extends Device {
   private int currentCapacity = 0;
   final private int maxCapacity;
